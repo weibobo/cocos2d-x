@@ -33,7 +33,8 @@ NS_CC_BEGIN
 class Sprite;
 
 namespace ui {
-
+    class Scale9Sprite;
+    
 typedef enum
 {
     SLIDER_PERCENTCHANGED
@@ -193,7 +194,7 @@ public:
     virtual void onTouchCancelled(Touch *touch, Event *unusedEvent) override;
     
     //override "getVirtualRendererSize" method of widget.
-    virtual const Size& getVirtualRendererSize() const override;
+    virtual Size getVirtualRendererSize() const override;
     
     //override "getVirtualRenderer" method of widget.
     virtual Node* getVirtualRenderer() override;
@@ -226,8 +227,8 @@ protected:
     virtual void copySpecialProperties(Widget* model) override;
     virtual void adaptRenderers() override;
 protected:
-    Node*  _barRenderer;
-    Node* _progressBarRenderer;
+    Scale9Sprite*  _barRenderer;
+    Scale9Sprite* _progressBarRenderer;
     Size _progressBarTextureSize;
     
     Sprite* _slidBallNormalRenderer;

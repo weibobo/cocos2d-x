@@ -139,7 +139,7 @@ public:
     bool isTouchScaleChangeEnabled()const;
 
     //override "getVirtualRendererSize" method of widget.
-    virtual const Size& getVirtualRendererSize() const override;
+    virtual Size getVirtualRendererSize() const override;
 
     //override "getVirtualRenderer" method of widget.
     virtual Node* getVirtualRenderer() override;
@@ -160,6 +160,10 @@ public:
     void setTextVerticalAlignment(TextVAlignment alignment);
 
     TextVAlignment getTextVerticalAlignment()const;
+    
+    void setTextColor(const Color4B color);
+    
+    const Color4B& getTextColor() const;
     
     /**
      * Enable shadow for the label

@@ -36,10 +36,11 @@ class DrawNode;
 class LayerColor;
 class LayerGradient;
 
+
 namespace ui {
     
 class LayoutManager;
-
+class Scale9Sprite;
 
 class CC_GUI_DLL LayoutProtocol
 {
@@ -462,15 +463,18 @@ protected:
     bool checkFocusEnabledChild()const;
     
 protected:
-    bool _clippingEnabled;
     
     //background
     bool _backGroundScale9Enabled;
-    Node* _backGroundImage;
+    Scale9Sprite* _backGroundImage;
     std::string _backGroundImageFileName;
     Rect _backGroundImageCapInsets;
     BackGroundColorType _colorType;
     TextureResType _bgImageTexType;
+    Size _backGroundImageTextureSize;
+    Color3B _backGroundImageColor;
+    GLubyte _backGroundImageOpacity;
+
     LayerColor* _colorRender;
     LayerGradient* _gradientRender;
     Color3B _cColor;
@@ -478,14 +482,15 @@ protected:
     Color3B _gEndColor;
     Vec2 _alongVector;
     GLubyte _cOpacity;
-    Size _backGroundImageTextureSize;
+    
+    //clipping
+    bool _clippingEnabled;
     Type _layoutType;
     ClippingType _clippingType;
     DrawNode* _clippingStencil;
     bool _scissorRectDirty;
     Rect _clippingRect;
     Layout* _clippingParent;
-    bool _doLayoutDirty;
     bool _clippingRectDirty;
     
     //clipping
@@ -503,10 +508,7 @@ protected:
     GLboolean _currentAlphaTestEnabled;
     GLenum _currentAlphaTestFunc;
     GLclampf _currentAlphaTestRef;
-    
-    
-    Color3B _backGroundImageColor;
-    GLubyte _backGroundImageOpacity;
+ 
     
     GLint _mask_layer_le;
     GroupCommand _groupCommand;
@@ -515,6 +517,9 @@ protected:
     CustomCommand _afterVisitCmdStencil;
     CustomCommand _beforeVisitCmdScissor;
     CustomCommand _afterVisitCmdScissor;
+    
+    bool _doLayoutDirty;
+    bool _isInterceptTouch;
     
     //whether enable loop focus or not
     bool _loopFocus;

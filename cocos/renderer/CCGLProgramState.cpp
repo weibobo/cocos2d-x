@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventType.h"
 #include "base/CCDirector.h"
+#include "base/CCEventDispatcher.h"
 
 NS_CC_BEGIN
 
@@ -113,7 +114,7 @@ void UniformValue::apply()
 void UniformValue::setCallback(const std::function<void(GLProgram*, Uniform*)> &callback)
 {
 	// delete previously set callback
-	// XXX TODO: memory will leak if the user does:
+	// TODO: memory will leak if the user does:
 	//    value->setCallback();
 	//    value->setFloat();
 	if (_useCallback)
@@ -278,7 +279,7 @@ GLProgramState::GLProgramState()
 , _textureUnitIndex(1)
 , _uniformAttributeValueDirty(true)
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
     /** listen the event that renderer was recreated on Android/WP8 */
     CCLOG("create rendererRecreatedListener for GLProgramState");
     _backToForegroundlistener = EventListenerCustom::create(EVENT_RENDERER_RECREATED, [this](EventCustom*) { _uniformAttributeValueDirty = true; });
@@ -288,7 +289,7 @@ GLProgramState::GLProgramState()
 
 GLProgramState::~GLProgramState()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundlistener);
 #endif
     

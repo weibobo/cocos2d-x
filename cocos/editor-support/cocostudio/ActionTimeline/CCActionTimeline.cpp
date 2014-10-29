@@ -31,7 +31,7 @@ NS_TIMELINE_BEGIN
 // ActionTimelineData
 ActionTimelineData* ActionTimelineData::create(int actionTag)
 {
-    ActionTimelineData * ret = new ActionTimelineData();
+    ActionTimelineData * ret = new (std::nothrow) ActionTimelineData();
     if (ret && ret->init(actionTag))
     {
         ret->autorelease();
@@ -58,7 +58,7 @@ bool ActionTimelineData::init(int actionTag)
 // ActionTimeline
 ActionTimeline* ActionTimeline::create()
 {
-    ActionTimeline* object = new ActionTimeline();
+    ActionTimeline* object = new (std::nothrow) ActionTimeline();
     if (object && object->init())
     {
         object->autorelease();
@@ -210,6 +210,7 @@ void foreachNodeDescendant(Node* parent, tCallBack callback)
 void ActionTimeline::startWithTarget(Node *target)
 {
     Action::startWithTarget(target);
+    this->setTag(target->getTag());
 
     foreachNodeDescendant(target, 
         [this, target](Node* child)

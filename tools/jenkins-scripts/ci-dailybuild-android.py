@@ -5,7 +5,9 @@ from shutil import copy
 import sys
 import traceback
 import MySQLdb
-
+from email.mime.text import MIMEText
+import smtplib
+import datetime
 def check_current_3rd_libs():
     #get current_libs config
     backup_files = range(2)
@@ -40,33 +42,85 @@ def strip_android_libs():
     _cmd = strip_cmd + ' ./tests/cpp-tests/proj.android/obj/local/armeabi/*.a'
     os.system(_cmd)
 
-def save_build_stats(filename, size):
+def connect_db():
     db_host = os.environ['db_host']
     db_user = os.environ['db_user']
     db_pw = os.environ['db_pw']
     db = MySQLdb.connect(db_host, db_user, db_pw, "dailybuild" )
+    return db
+
+def close_db(db):
+    db.close()
+
+def save_build_stats(db, filename, size):
     cursor = db.cursor()
     sql = "INSERT INTO %s (size, createdTime) VALUES(%d, now())" % (filename, size)
     print sql
     cursor.execute(sql)
     db.commit()
-    db.close()
-def scan_all_libs():
+
+def scan_all_libs(db):
+    stats = {}
     _path = 'tests/cpp-empty-test/proj.android/libs/armeabi/libcpp_empty_test.so'
     filesize = os.path.getsize(_path)/1024
-    save_build_stats('libcpp_empty_test', filesize)
+    stats['libcpp_empty_test'] = filesize
+    save_build_stats(db, 'libcpp_empty_test', filesize)
     _path = 'tests/lua-empty-test/project/proj.android/libs/armeabi/liblua_empty_test.so'
     filesize = os.path.getsize(_path)/1024
-    save_build_stats('liblua_empty_test', filesize)
+    stats['liblua_empty_test'] = filesize
+    save_build_stats(db, 'liblua_empty_test', filesize)
     lib_path = './tests/cpp-tests/proj.android/obj/local/armeabi'
     for root, dirs, files in os.walk(lib_path):
       for _file in files:
         if not _file.endswith(".a"):
           continue
+        print _file
         libfile = lib_path + '/' + _file
         _filename = _file.split('.')[0]
         filesize = os.path.getsize(libfile)/1024
-        save_build_stats(_filename, filesize)
+        stats[_filename]=filesize
+        save_build_stats(db, _filename, filesize)
+    return stats
+
+def send_mail(sub,title,content):
+    #to_list = os.environ['EMAIL_LIST'].split(' ')
+    mail_user = os.environ['EMAIL_USER']
+    mail_pass = os.environ['EMAIL_PWD']
+    to_list = os.environ['EMAIL_LIST'].split(' ')
+    mail_postfix = 'gmail.com'
+    me = mail_user + "<" + mail_user + "@" + mail_postfix + ">"
+    msg = MIMEText(content, _subtype='plain', _charset='gb2312')
+    msg['Subject'] = sub
+    msg['From'] = me
+    msg['To'] = " ".join(to_list)
+    print 'to users:', msg['To']
+    msg['Content'] = 'test'
+    try:
+        s = smtplib.SMTP('smtp.gmail.com', 587)
+        s.ehlo()
+        s.starttls()
+        s.login(mail_user,mail_pass)
+        s.sendmail(me, to_list, str(msg))
+        print 'info:', me, to_list, str(msg)
+        s.close()
+        return True
+    except Exception, e:
+        print str(e)
+        return False
+
+def sendEmail(stats):
+    now = datetime.datetime.now()
+    sub = "Cocos2d-x Android dailybuild stats of " + now.strftime("%Y-%m-%d")
+    title = "Dailybuild stats"
+    content = "The following list tracks the sizes of Cocos2d-x Android built libraries:\n"
+
+    for key in stats:
+        content += key 
+        content += " : "
+        content += str(stats[key]) + "KB"
+        content += "\n"
+
+    send_mail(sub, title, content)
 
 def main():
     print 'Build Config:'
@@ -89,7 +143,10 @@ def main():
     ret = os.system('python build/android-build.py -b release all')
     if(ret == 0):
       strip_android_libs()
-      scan_all_libs()
+      db = connect_db()
+      stats = scan_all_libs(db)
+      close_db(db)
+      sendEmail(stats)
     os.system('git clean -xdf -f')
     print 'build exit'
     print ret

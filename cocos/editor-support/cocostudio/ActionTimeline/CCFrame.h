@@ -25,9 +25,14 @@ THE SOFTWARE.
 #ifndef __CCFRAME_H__
 #define __CCFRAME_H__
 
-#include "cocos2d.h"
+#include <string>
+#include "base/CCRef.h"
+#include "base/CCVector.h"
+#include "2d/CCNode.h"
+#include "2d/CCSprite.h"
 #include "CCTimelineMacro.h"
 #include "cocostudio/CocosStudioExport.h"
+
 
 NS_TIMELINE_BEGIN
 
@@ -49,6 +54,8 @@ public:
     virtual void setTween(bool tween) { _tween = tween; }
     virtual bool isTween() const { return _tween; }
 
+    virtual bool isEnterWhenPassed() { return _enterWhenPassed; }
+
     virtual void onEnter(Frame *nextFrame) = 0;
     virtual void apply(float percent) {}
 
@@ -63,6 +70,7 @@ protected:
 
     unsigned int    _frameIndex;
     bool            _tween;
+    bool            _enterWhenPassed;
 
     Timeline* _timeline;
     cocos2d::Node*  _node;
@@ -295,6 +303,7 @@ class CC_STUDIO_DLL EventFrame : public Frame
 {
 public:
     static EventFrame* create();
+    void init();
 
     EventFrame();
 

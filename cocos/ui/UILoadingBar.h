@@ -31,7 +31,7 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 namespace ui {
-
+    class Scale9Sprite;
 /**
 *   @js NA
 *   @lua NA
@@ -130,7 +130,7 @@ public:
     virtual void ignoreContentAdaptWithSize(bool ignore) override;
     
     //override "getVirtualRendererSize" method of widget.
-    virtual const Size& getVirtualRendererSize() const override;
+    virtual Size getVirtualRendererSize() const override;
     
     //override "getVirtualRenderer" method of widget.
     virtual Node* getVirtualRenderer() override;
@@ -154,7 +154,7 @@ protected:
     Direction _direction;
     float _percent;
     float _totalLength;
-    Node* _barRenderer;
+    Scale9Sprite* _barRenderer;
     TextureResType _renderBarTexType;
     Size _barRendererTextureSize;
     bool _scale9Enabled;
